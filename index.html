@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sorteo Torneo Round Robin - Premium</title>
+    <!-- Importar tipografías elegantes desde Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Montserrat', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            /* Fondo con patrón de ajedrez premium e hipnótico */
+            background-color: #f3f3f3;
+            background-image: 
+                linear-gradient(45deg, #e1e1e1 25%, transparent 25%, transparent 75%, #e1e1e1 75%, #e1e1e1),
+                linear-gradient(45deg, #e1e1e1 25%, #f3f3f3 25%, #f3f3f3 75%, #e1e1e1 75%, #e1e1e1);
+            background-size: 60px 60px;
+            background-position: 0 0, 30px 30px;
+            padding: 20px;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.96);
+            width: 100%;
+            max-width: 700px;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0);
+            backdrop-filter: blur(10px);
+            transition: all 0.5s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        h2 {
+            font-family: 'Cinzel', serif;
+            text-align: center;
+            color: #1a1a1a;
+            font-size: 2rem;
+            letter-spacing: 2px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #d4af37; /* Dorado */
+            padding-bottom: 15px;
+        }
+        p.instruction {
+            text-align: center;
+            font-size: 1.1rem;
+            color: #555;
+            margin-bottom: 25px;
+            font-weight: 300;
+        }
+        /* Botones de Selección */
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .btn-choice {
+            padding: 15px 30px;
+            font-size: 1rem;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 600;
+            cursor: pointer;
+            border: 2px solid #1a1a1a;
+            border-radius: 8px;
+            background-color: transparent;
+            color: #1a1a1a;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .btn-choice:hover {
+            background-color: #1a1a1a;
+            color: #fff;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .btn-choice.active {
+            background-color: #d4af37;
+            border-color: #d4af37;
+            color: #fff;
+            box-shadow: 0 5px 15px rgba(212, 175, 55, 0.4);
+        }
+        /* Campos de Entrada de Nombres */
+        .inputs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 25px;
+            animation: fadeIn 0.5s ease forwards;
+        }
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .input-group label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #777;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .input-group input {
+            padding: 12px 15px;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            background-color: #fafafa;
+            transition: all 0.3s ease;
+        }
+        .input-group input:focus {
+            outline: none;
+            border-color: #d4af37;
+            background-color: #fff;
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.15);
+        }
+        /* Botón de Sorteo Principal */
+        .btn-action-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 35px;
+        }
+        .btn-action {
+            padding: 16px 40px;
+            font-family: 'Cinzel', serif;
+            font-size: 1.2rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            cursor: pointer;
+            border: none;
+            border-radius: 50px;
+            background: linear-gradient(135deg, #1a1a1a 0%, #333333 100%);
+            color: #fff;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            transition: all 0.4s ease;
+        }
+        .btn-action:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 25px rgba(0,0,0,0.3);
+            background: linear-gradient(135deg, #d4af37 0%, #aa8413 100%);
+        }
+        /* Contenedor de Animación del Sorteo */
+        .dice-box {
+            background: #1a1a1a;
+            color: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 30px;
+            border-left: 5px solid #d4af37;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.6);
+        }
+        .dice-status {
+            font-size: 1.1rem;
+            font-weight: 300;
+            letter-spacing: 1px;
+            color: #ccc;
+            margin-bottom: 10px;
+        }
+        .dice-animation {
+            font-size: 2.2rem;
+            font-family: 'Cinzel', serif;
+            color: #d4af37;
+            font-weight: 700;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            animation: pulse 0.5s infinite alternate;
+        }
+        /* Tabla de Resultados */
+        .results-section {
+            margin-top: 40px;
+            animation: fadeInUp 0.7s cubic-bezier(0.1, 1, 0.1, 1) forwards;
+        }
+        .results-section h3 {
+            font-family: 'Cinzel', serif;
+            text-align: center;
+            color: #1a1a1a;
+            margin-bottom: 20px;
+            font-size: 1.4rem;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            overflow: hidden;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        th, td {
+            padding: 15px 20px;
+            text-align: left;
+        }
+        th {
+            background-color: #1a1a1a;
+            color: #fff;
+            font-family: 'Cinzel', serif;
+            font-size: 0.95rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        td {
+            background-color: #fff;
+            color: #333;
+            border-bottom: 1px solid #eee;
+            font-size: 1rem;
+        }
+        tr:last-child td {
+            border-bottom: none;
+        }
+        tr:nth-child(even) td {
+            background-color: #f9f9f9;
+        }
+        .badge {
+            background-color: #d4af37;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: inline-block;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 5px rgba(212, 175, 55, 0.3);
+        }
+        /* Elementos Ocultos de Control */
+        .hidden {
+            display: none !important;
+        }
+        /* Animaciones CSS */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes pulse {
+            from { transform: scale(0.95); opacity: 0.8; }
+            to { transform: scale(1.05); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Sorteo Round Robin</h2>
+
+        <!-- Fase 1: Selección de Participantes -->
+        <div id="fase1">
+            <p class="instruction">Selecciona la cantidad de competidores con el mouse:</p>
+            <div class="btn-group">
+                <button class="btn-choice" onclick="configurarParticipantes(4, this)">4 Jugadores</button>
+                <button class="btn-choice" onclick="configurarParticipantes(6, this)">6 Jugadores</button>
+                <button class="btn-choice" onclick="configurarParticipantes(8, this)">8 Jugadores</button>
+            </div>
+        </div>
+
+        <!-- Fase 2: Entrada de Nombres -->
+        <div id="fase2" class="hidden">
+            <p class="instruction" style="margin-top: 20px;">Personaliza los nombres de los competidores:</p>
+            <div id="grid-nombres" class="inputs-grid"></div>
+            <div class="btn-action-container">
+                <button class="btn-action" onclick="iniciarSorteoConDado()">Girar e Iniciar Sorteo</button>
+            </div>
+        </div>
+
+        <!-- Fase 3: Animación del Dado -->
+        <div id="fase3" class="dice-box hidden">
+            <div id="dice-status" class="dice-status">Preparando dados...</div>
+            <div id="dice-animation" class="dice-animation">🎲 [ ? ]</div>
+        </div>
+
+        <!-- Fase 4: Tabla de Resultados Elegante -->
+        <div id="fase4" class="results-section hidden">
+            <h3>Asignación Oficial de Posiciones</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Participante Registrado</th>
+                        <th>Posición Asignada (Fixture)</th>
+                    </tr>
+                </thead>
+                <tbody id="tabla-cuerpo"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        let totalCompetidores = 0;
+
+        function configurarParticipantes(cantidad, boton) {
+            totalCompetidores = cantidad;
+            
+            // Alternar estado activo en botones con el mouse
+            document.querySelectorAll('.btn-choice').forEach(b => b.classList.remove('active'));
+            boton.classList.add('active');
+
+            // Generar los campos elegantemente
+            const grid = document.getElementById('grid-nombres');
+            grid.innerHTML = '';
+            for (let i = 1; i <= cantidad; i++) {
+                grid.innerHTML += `
+                    <div class="input-group">
+                        <label>Competidor ${i}</label>
+                        <input type="text" id="input-competidor-${i}" placeholder="Nombre del jugador" value="Jugador ${i}">
+                    </div>
+                `;
+            }
+            
+            // Animaciones de transición suaves quitando la propiedad hidden
+            document.getElementById('fase2').classList.remove('hidden');
+            document.getElementById('fase3').classList.add('hidden');
+            document.getElementById('fase4').classList.add('hidden');
+        }
+
+        async function iniciarSorteoConDado() {
+            let nombres = [];
+            for (let i = 1; i <= totalCompetidores; i++) {
+                let nombreIn = document.getElementById(`input-competidor-${i}`).value.trim();
+                nombres.push(nombreIn || `Jugador ${i}`);
+            }
+
+            const fase3 = document.getElementById('fase3');
+            const statusText = document.getElementById('dice-status');
+            const animText = document.getElementById('dice-animation');
+            
+            fase3.classList.remove('hidden');
+            document.getElementById('fase4').classList.add('hidden');
+
+            let poolPosiciones = Array.from({length: totalCompetidores}, (_, i) => i + 1);
+            let matrizResultados = [];
+
+            // Algoritmo de barajado y simulación de dados interactiva
+            for (let i = 0; i < totalCompetidores; i++) {
+                if (i === totalCompetidores - 1) {
+                    // Último jugador se asigna de forma directa con elegancia
+                    await retardoMili(700);
+                    let ultimaPos = poolPosiciones[0];
+                    statusText.innerHTML = `Asignación automática de cierre para <strong>${nombres[i]}</strong>`;
+                    animText.innerHTML = `✨ J${ultimaPos}`;
+                    matrizResultados.push({ nombre: nombres[i], badge: `J${ultimaPos}`, num: ultimaPos });
+                    await retardoMili(800);
+                } else {
+                    // Animación simulada del dado iterando números aleatorios velozmente
+                    statusText.innerHTML = `Lanzando dados para: <strong>${nombres[i]}</strong>`;
+                    
+                    // Ciclo veloz de rostros de dados para simular giro continuo
+                    for (let paso = 0; paso < 10; paso++) {
+                        let numFalso = poolPosiciones[Math.floor(Math.random() * poolPosiciones.length)];
+                        animText.innerHTML = `🎲 [ J${numFalso} ]`;
+                        await retardoMili(100);
+                    }
+
+                    // Elección y extracción definitiva
+                    let indiceElegido = Math.floor(Math.random() * poolPosiciones.length);
+                    let posReal = poolPosiciones[indiceElegido];
+                    poolPosiciones.splice(indiceElegido, 1);
+
+                    animText.innerHTML = `✨ ¡Salió J${posReal}!`;
+                    matrizResultados.push({ nombre: nombres[i], badge: `J${posReal}`, num: posReal });
+                    await retardoMili(1200); // Pausa dramática para procesar el resultado
+                }
+            }
+
+            // Ocultar caja de dados y compilar tabla elegante
+            fase3.classList.add('hidden');
+            construirTablaElegante(matrizResultados);
+        }
+
+        function retardoMili(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        function construirTablaElegante(resultados) {
+            const tbody = document.getElementById('tabla-cuerpo');
+            tbody.innerHTML = '';
+            
+            // Ordenar numéricamente de J1 a JX para una visualización premium
+            resultados.sort((a, b) => a.num - b.num);
+
+            resultados.forEach(item => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td><strong>${item.nombre}</strong></td>
+                        <td><span class="badge">${item.badge}</span></td>
+                    </tr>
+                `;
+            });
+
+            document.getElementById('fase4').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
